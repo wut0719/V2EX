@@ -30,6 +30,7 @@
 		F7DE194B19C0009D00E170B5 /* CoreDataTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F7DE194A19C0009D00E170B5 /* CoreDataTableViewController.m */; };
 		F7DE195119C001FF00E170B5 /* HotCDTVC.m in Sources */ = {isa = PBXBuildFile; fileRef = F7DE195019C001FF00E170B5 /* HotCDTVC.m */; };
 		F7DE195619C0861E00E170B5 /* ContentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F7DE195519C0861E00E170B5 /* ContentViewController.m */; };
+		F7FB9F9A19CE684600E4DC19 /* LatestCDTVC.m in Sources */ = {isa = PBXBuildFile; fileRef = F7FB9F9919CE684600E4DC19 /* LatestCDTVC.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,9 +77,12 @@
 		F7DE194A19C0009D00E170B5 /* CoreDataTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataTableViewController.m; sourceTree = "<group>"; };
 		F7DE194F19C001FF00E170B5 /* HotCDTVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HotCDTVC.h; sourceTree = "<group>"; };
 		F7DE195019C001FF00E170B5 /* HotCDTVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HotCDTVC.m; sourceTree = "<group>"; };
-		F7DE195219C042CA00E170B5 /* HotDatabadeAvailability.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HotDatabadeAvailability.h; sourceTree = "<group>"; };
+		F7DE195219C042CA00E170B5 /* HotDatabaseAvailability.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HotDatabaseAvailability.h; sourceTree = "<group>"; };
 		F7DE195419C0861E00E170B5 /* ContentViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContentViewController.h; sourceTree = "<group>"; };
 		F7DE195519C0861E00E170B5 /* ContentViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContentViewController.m; sourceTree = "<group>"; };
+		F7FB9F9819CE684600E4DC19 /* LatestCDTVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LatestCDTVC.h; sourceTree = "<group>"; };
+		F7FB9F9919CE684600E4DC19 /* LatestCDTVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LatestCDTVC.m; sourceTree = "<group>"; };
+		F7FB9F9B19CE691500E4DC19 /* LatestDatabaseAvailability.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LatestDatabaseAvailability.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,7 +144,8 @@
 			children = (
 				F76B37F319BF2DAA003AC09E /* AppDelegate.h */,
 				F76B37F419BF2DAA003AC09E /* AppDelegate.m */,
-				F7DE195219C042CA00E170B5 /* HotDatabadeAvailability.h */,
+				F7DE195219C042CA00E170B5 /* HotDatabaseAvailability.h */,
+				F7FB9F9B19CE691500E4DC19 /* LatestDatabaseAvailability.h */,
 				F76B37F619BF2DAA003AC09E /* Main_iPhone.storyboard */,
 				F76B37F919BF2DAA003AC09E /* Main_iPad.storyboard */,
 				F76B37FF19BF2DAA003AC09E /* Images.xcassets */,
@@ -205,6 +210,8 @@
 				F7DE194A19C0009D00E170B5 /* CoreDataTableViewController.m */,
 				F7DE194F19C001FF00E170B5 /* HotCDTVC.h */,
 				F7DE195019C001FF00E170B5 /* HotCDTVC.m */,
+				F7FB9F9819CE684600E4DC19 /* LatestCDTVC.h */,
+				F7FB9F9919CE684600E4DC19 /* LatestCDTVC.m */,
 				F7DE195419C0861E00E170B5 /* ContentViewController.h */,
 				F7DE195519C0861E00E170B5 /* ContentViewController.m */,
 			);
@@ -318,6 +325,7 @@
 				F76B381E19BF2DE4003AC09E /* V2EX.xcdatamodeld in Sources */,
 				F76B382E19BF560D003AC09E /* Hot+Input.m in Sources */,
 				F76B382119BF3095003AC09E /* Fetcher.m in Sources */,
+				F7FB9F9A19CE684600E4DC19 /* LatestCDTVC.m in Sources */,
 				F7DE195119C001FF00E170B5 /* HotCDTVC.m in Sources */,
 				F76B37F119BF2DAA003AC09E /* main.m in Sources */,
 			);

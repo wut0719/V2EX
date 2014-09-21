@@ -1,5 +1,5 @@
 //
-//  HotDatabadeAvailability.h
+//  HotDatabaseAvailability.h
 //  V2EX
 //
 //  Created by wp on 14-9-10.

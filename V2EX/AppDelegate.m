@@ -9,12 +9,17 @@
 #import "AppDelegate.h"
 #import "Fetcher.h"
 #import "Hot+Input.h"
-#import "HotDatabadeAvailability.h"
+#import "HotDatabaseAvailability.h"
+#import "Latest+Input.h"
+#import "LatestDatabaseAvailability.h"
 
 @interface AppDelegate () <NSURLSessionDownloadDelegate>
-@property (strong, nonatomic) UIManagedDocument *document;
-@property (strong, nonatomic) NSManagedObjectContext *databaseContext;
-@property (strong, nonatomic) NSURLSession *downloadSession;
+@property (strong, nonatomic) UIManagedDocument *hotDocument;
+@property (strong, nonatomic) UIManagedDocument *latestDocument;
+@property (strong, nonatomic) NSManagedObjectContext *hotDatabaseContext;
+@property (strong, nonatomic) NSManagedObjectContext *latestDatabaseContext;
+@property (strong, nonatomic) NSURLSession *hotDownloadSession;
+@property (strong, nonatomic) NSURLSession *latestDownloadSession;
 @property (copy, nonatomic) void (^downloadBackgroundURLSessionCompletionHandler)();//block的声明
 @end
 
@@ -27,53 +32,101 @@
     //准备UIManagedDoucment
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSURL *documentDirectory = [[fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] firstObject];
-    NSString *documentName = @"MyDatabase";
-    NSURL *url = [documentDirectory URLByAppendingPathComponent:documentName];
-    self.document = [[UIManagedDocument alloc] initWithFileURL:url];
+    NSString *hotDocumentName = @"HotDatabase";
+    NSURL *hotURL = [documentDirectory URLByAppendingPathComponent:hotDocumentName];
+    NSURL *latestURL = [documentDirectory URLByAppendingPathComponent:@"LatestDatabase"];
+    self.hotDocument = [[UIManagedDocument alloc] initWithFileURL:hotURL];
+    self.latestDocument =[[UIManagedDocument alloc] initWithFileURL:latestURL];
     
-    if ([fileManager fileExistsAtPath:[url path]]) {
-        [self.document openWithCompletionHandler:^(BOOL success) {
+    if ([fileManager fileExistsAtPath:[hotURL path]]) {
+        [self.hotDocument openWithCompletionHandler:^(BOOL success) {
             if (success) {
                 [self documentIsReady];
             } else {
-                NSLog(@"couldn't open document at %@",url);
+                NSLog(@"couldn't open document at %@",hotURL);
             }
         }];
     } else {
-        [self.document saveToURL:url forSaveOperation:0 completionHandler:^(BOOL success) {
+        [self.hotDocument saveToURL:hotURL forSaveOperation:0 completionHandler:^(BOOL success) {
             if (success) {
                 [self documentIsReady];
             } else {
-                NSLog(@"coulden't create document at %@",url);
+                NSLog(@"coulden't create document at %@",hotURL);
+            }
+        }];
+    }
+    if ([fileManager fileExistsAtPath:[latestURL path]]) {
+        [self.latestDocument openWithCompletionHandler:^(BOOL success) {
+            if (success) {
+                [self documentIsReady];
+            } else {
+                NSLog(@"couldn't open document at %@",latestURL);
+            }
+        }];
+    } else {
+        [self.latestDocument saveToURL:latestURL forSaveOperation:0 completionHandler:^(BOOL success) {
+            if (success) {
+                [self documentIsReady];
+            } else {
+                NSLog(@"coulden't create document at %@",latestURL);
             }
         }];
     }
     return YES;
 }
+
 - (void)documentIsReady
 {
-    if (self.document.documentState == UIDocumentStateNormal) {
-        self.databaseContext = self.document.managedObjectContext;
+    if (self.hotDocument.documentState == UIDocumentStateNormal) {
+        self.hotDatabaseContext = self.hotDocument.managedObjectContext;
         //进行core data的操作
-        [self startFetch];
+        [self startHotFetch];
+    }
+    if (self.latestDocument.documentState == UIDocumentStateNormal) {
+        self.latestDatabaseContext = self.latestDocument.managedObjectContext;
+        //进行core data的操作
+        [self startLatestFetch];
     }
 }
-- (void)setDatabaseContext:(NSManagedObjectContext *)databaseContext
+- (void)setHotDatabaseContext:(NSManagedObjectContext *)databaseContext
 {
-    _databaseContext = databaseContext;
-    NSDictionary *userInfo = self.databaseContext ? @{ HotDatabaseAvailabilityContext : self.databaseContext } : nil;
+    _hotDatabaseContext = databaseContext;
+    NSDictionary *userInfo = self.hotDatabaseContext ? @{ HotDatabaseAvailabilityContext : self.hotDatabaseContext} : nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:HotDatabaseAvailabilityNotification
                                                         object:nil //所有object都能接收
                                                       userInfo:userInfo];
 }
-#pragma mark - fetching
-- (void)startFetch
+- (void)setLatestDatabaseContext:(NSManagedObjectContext *)databaseContext
 {
-    [self.downloadSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
+    _latestDatabaseContext = databaseContext;
+    NSDictionary *userInfo = self.latestDatabaseContext ? @{ LatestDatabaseAvailabilityContext : self.latestDatabaseContext} : nil;
+    [[NSNotificationCenter defaultCenter] postNotificationName:LatestDatabaseAvailabilityNotification
+                                                        object:nil
+                                                      userInfo:userInfo];
+}
+
+#pragma mark - fetching
+- (void)startHotFetch
+{
+    [self.hotDownloadSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
         if (![downloadTasks count]) {
-            NSURLSessionDownloadTask *task = [self.downloadSession downloadTaskWithURL:[Fetcher URLforHot]];
-            task.taskDescription = @"Just uploaded fetch!";
-            [task resume];
+            NSURLSessionDownloadTask *hotTask = [self.hotDownloadSession downloadTaskWithURL:[Fetcher URLforHot]];
+            hotTask.taskDescription = @"Just uploaded hot fetch!";
+            [hotTask resume];
+        } else {
+            for (NSURLSessionDownloadTask *task in downloadTasks) {
+                [task resume];
+            }
+        }
+    }];
+}
+- (void)startLatestFetch
+{
+    [self.latestDownloadSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
+        if (![downloadTasks count]) {
+            NSURLSessionDownloadTask *latestTask = [self.latestDownloadSession downloadTaskWithURL:[Fetcher URLforLatest]];
+            latestTask.taskDescription = @"Just uploaded latest fetch!";
+            [latestTask resume];
         } else {
             for (NSURLSessionDownloadTask *task in downloadTasks) {
                 [task resume];
@@ -82,27 +135,49 @@
     }];
 }
 
-- (NSURLSession *)downloadSession
+- (NSURLSession *)hotDownloadSession
 {
-    if (!_downloadSession) {
+    if (!_hotDownloadSession) {
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
-            NSURLSessionConfiguration *urlSessionConfig = [NSURLSessionConfiguration backgroundSessionConfiguration:@"Just uploaded fetch!"];
+            NSURLSessionConfiguration *urlSessionConfig = [NSURLSessionConfiguration backgroundSessionConfiguration:@"Just uploaded hot fetch!"];
             urlSessionConfig.allowsCellularAccess = NO;
-            _downloadSession = [NSURLSession sessionWithConfiguration:urlSessionConfig
+            _hotDownloadSession = [NSURLSession sessionWithConfiguration:urlSessionConfig
                                                              delegate:self
                                                         delegateQueue:nil];
         });
     }
-    return _downloadSession;
+    return _hotDownloadSession;
+}
+- (NSURLSession *)latestDownloadSession
+{
+    if (!_latestDatabaseContext) {
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            NSURLSessionConfiguration *urlSessionConfig = [NSURLSessionConfiguration backgroundSessionConfiguration:@"Just uploaded latest fetch!"];
+            urlSessionConfig.allowsCellularAccess = NO;
+            _latestDownloadSession = [NSURLSession sessionWithConfiguration:urlSessionConfig
+                                                             delegate:self
+                                                        delegateQueue:nil];
+        });
+    }
+    return _latestDownloadSession;
 }
 - (NSArray *)hotListAtURL:(NSURL *)url
 {
     NSData *hotListJSONData = [NSData dataWithContentsOfURL:url];
-    NSArray *hotPropertyList = [NSJSONSerialization JSONObjectWithData:hotListJSONData
+    NSArray *hotList = [NSJSONSerialization JSONObjectWithData:hotListJSONData
                                                                    options:0
                                                                      error:NULL];
-    return hotPropertyList;
+    return hotList;
+}
+- (NSArray *)latestListAtURL:(NSURL *)url
+{
+    NSData *latestListJSONData = [NSData dataWithContentsOfURL:url];
+    NSArray *latestList = [NSJSONSerialization JSONObjectWithData:latestListJSONData
+                                                          options:0
+                                                            error:NULL];
+    return latestList;
 }
 
 #pragma mark - NSURLSessionDownloadDelegate required
@@ -112,8 +187,8 @@ didFinishDownloadingToURL:(NSURL *)localFile
 {
     //文件刚下载完成时
     //检查是否是自己的下载任务，通过taskDescription
-    if ([downloadTask.taskDescription isEqualToString:@"Just uploaded fetch!"]) {
-        NSManagedObjectContext *context = self.databaseContext;
+    if ([downloadTask.taskDescription isEqualToString:@"Just uploaded hot fetch!"]) {
+        NSManagedObjectContext *context = self.hotDatabaseContext;
         if (context) {
             NSArray *hotList = [self hotListAtURL:localFile];
             [context performBlock:^{
@@ -123,6 +198,18 @@ didFinishDownloadingToURL:(NSURL *)localFile
             [self downloadTasksMightBeComplete];
         }
     }
+    if ([downloadTask.taskDescription isEqualToString:@"Just uploaded latest fetch!"]) {
+        NSManagedObjectContext *context = self.latestDatabaseContext;
+        if (context) {
+            NSArray *latestList = [self latestListAtURL:localFile];
+            [context performBlock:^{
+                [Hot loadHotFromListArray:latestList intoManagedObjectContext:context];
+            }];
+        } else {
+            [self downloadTasksMightBeComplete];
+        }
+    }
+    
     
 }
 
@@ -146,7 +233,7 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
 - (void)downloadTasksMightBeComplete
 {
     if (self.downloadBackgroundURLSessionCompletionHandler) {
-        [self.downloadSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
+        [self.hotDownloadSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
             // we're doing this check for other downloads just to be theoretically "correct"
             //  but we don't actually need it (since we only ever fire off one download task at a time)
             // in addition, note that getTasksWithCompletionHandler: is ASYNCHRONOUS

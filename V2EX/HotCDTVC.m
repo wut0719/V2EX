@@ -8,8 +8,13 @@
 
 #import "HotCDTVC.h"
 #import "Hot.h"
-#import "HotDatabadeAvailability.h" //接收通知使用
+#import "HotDatabaseAvailability.h" //接收通知使用
 #import "ContentViewController.h"
+
+@interface HotCDTVC ()
+- (IBAction)refresh:(id)sender;
+
+@end
 
 @implementation HotCDTVC
 
@@ -51,13 +56,18 @@
     return cell;
 }
 
+- (IBAction)refresh:(id)sender
+{
+    [sender endRefreshing];
+}
+
 #pragma mark - Navigation
 
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if ([segue.destinationViewController isKindOfClass:[ContentViewController class]]) {
-        if ([segue.identifier isEqualToString:@"Content"]) {
+        if ([segue.identifier isEqualToString:@"Hot Content"]) {
             ContentViewController *cvc = (ContentViewController *)segue.destinationViewController;
             NSIndexPath *indexPath = [self.tableView indexPathForCell:sender];
             Hot *hot = [self.fetchedResultsController objectAtIndexPath:indexPath];
